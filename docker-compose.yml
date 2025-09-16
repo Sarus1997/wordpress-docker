@@ -14,9 +14,9 @@ services:
       MYSQL_ROOT_PASSWORD: rootpassword # รหัสผ่าน root
     volumes:
       - db_data:/var/lib/mysql
-      # เปิดให้ host connect ถ้า port 3306 ว่าง
-      # ports:
-      #   - "3306:3306"
+    # เปิดให้ host connect ถ้า port 3306 ว่าง
+    # ports:
+    #   - "3306:3306"
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
       interval: 5s
@@ -43,12 +43,15 @@ services:
 
   # ตั้งค่า phpMyAdmin
   phpmyadmin:
-    image: phpmyadmin/phpmyadmin
+    image: phpmyadmin/phpmyadmin # ใช้ image phpMyAdmin ล่าสุด
     container_name: phpmyadmin_app # ชื่อ container
-    restart: always # ให้ container เริ่มใหม่อัตโนมัติเมื่อหยุดทำงาน
-    environment: 
+    restart: always # รีสตาร์ทอัตโนมัติเมื่อ container หยุดทำงาน
+    environment:
       PMA_HOST: db # ชี้ไปที่ service db
-      PMA_PORT: 3306 # พอร์ตของ MySQL
+      PMA_PORT: 3306 # พอร์ตของฐานข้อมูล
+      PMA_USER: root # ชื่อผู้ใช้ฐานข้อมูล
+      PMA_PASSWORD: rootpassword   # รหัสผ่าน root
+      PMA_ABSOLUTE_URI: http://localhost:8081/
     ports:
       - "8081:80"
     depends_on:

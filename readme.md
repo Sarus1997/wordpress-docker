@@ -17,33 +17,69 @@ docker-compose --version
 ## 📝 3. สร้างไฟล์ docker-compose.yml
 สร้างไฟล์ docker-compose.yml ด้วยเนื้อหานี้:
 ```yaml
+version: '3.9'
+
 services:
+
+  # ตั้งค่า MySQL 5.7
   db:
     image: mysql:5.7
     container_name: wordpress_db
     restart: always
     environment:
-      MYSQL_DATABASE: wordpress
-      MYSQL_USER: wordpress
-      MYSQL_PASSWORD: wordpress
-      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: wordpress # ชื่อฐานข้อมูล
+      MYSQL_USER: wordpress # ชื่อผู้ใช้ฐานข้อมูล
+      MYSQL_PASSWORD: wordpress # รหัสผ่านฐานข้อมูล
+      MYSQL_ROOT_PASSWORD: rootpassword # รหัสผ่าน root
     volumes:
-      - "D:/wordpress-docker/www/db_data:/var/lib/mysql"
+      - db_data:/var/lib/mysql
+    # เปิดให้ host connect ถ้า port 3306 ว่าง
+    # ports:
+    #   - "3306:3306"
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 5s
+      retries: 5
+      start_period: 10s
+      timeout: 5s
 
+  # ตั้งค่า WordPress
   wordpress:
     image: wordpress:latest
     container_name: wordpress_app
     ports:
       - "8080:80"
     environment:
-      WORDPRESS_DB_HOST: db:3306
-      WORDPRESS_DB_USER: wordpress
-      WORDPRESS_DB_PASSWORD: wordpress
-      WORDPRESS_DB_NAME: wordpress
+      WORDPRESS_DB_HOST: db:3306 # ชี้ไปที่ service db
+      WORDPRESS_DB_USER: wordpress # ชื่อผู้ใช้ฐานข้อมูล
+      WORDPRESS_DB_PASSWORD: wordpress # รหัสผ่านฐานข้อมูล
+      WORDPRESS_DB_NAME: wordpress # ชื่อฐานข้อมูล
     volumes:
-      - "D:/wordpress-docker/www/wordpress:/var/www/html"
+      - wordpress_data:/var/www/html
+    depends_on:
+      db:
+        condition: service_healthy
+
+  # ตั้งค่า phpMyAdmin
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin # ใช้ image phpMyAdmin ล่าสุด
+    container_name: phpmyadmin_app # ชื่อ container
+    restart: always # รีสตาร์ทอัตโนมัติเมื่อ container หยุดทำงาน
+    environment:
+      PMA_HOST: db # ชี้ไปที่ service db
+      PMA_PORT: 3306 # พอร์ตของฐานข้อมูล
+      PMA_USER: root # ชื่อผู้ใช้ฐานข้อมูล
+      PMA_PASSWORD: rootpassword   # รหัสผ่าน root
+      PMA_ABSOLUTE_URI: http://localhost:8081/
+    ports:
+      - "8081:80"
     depends_on:
       - db
+
+volumes:
+  wordpress_data:
+  db_data:
+
 ```
 💡 Tip: ใช้ path ของ Windows แบบ D:/... เท่านั้น และไม่ใช้ backslash \
 
@@ -59,11 +95,6 @@ docker-compose up -d
 ```
 Docker Compose จะสร้าง `db_data` และ `wordpress_data` ให้เองอัตโนมัติจากที่ประกาศไว้ใน `volumes:`
 
-ถ้าอยากสร้างเฉพาะ volume เองโดยตรง (ไม่ต้องรัน service) ก็ทำได้ เช่น:
-
-```bash
-docker volume create db_data
-docker volume create wordpress_data
 ```
 <dev>
     <ul>
@@ -74,6 +105,13 @@ docker volume create wordpress_data
 
 ```powershell
 docker ps
+
+ถ้าอยากสร้างเฉพาะ volume เองโดยตรง (ไม่ต้องรัน service) ก็ทำได้ เช่น:
+
+```bash
+docker volume create db_data
+docker volume create wordpress_data
+
 ```
 <dev>
     <ul>
@@ -84,6 +122,19 @@ docker ps
 ```powershell
 docker-compose logs -f wordpress
 docker-compose logs -f db
+```
+ถ้าหาก Clone ไปใช้งาน ใช้วิธีนี้:
+<dev>
+    <p>1. ลง container เดิมก่อน:</p>
+</dev>
+```bash
+docker-compose down
+```
+<dev>
+    <p>2. รันใหม่:</p>
+</dev>
+```bash
+docker-compose up -d
 ```
 
 ## 🌐 6. ตั้งค่า WordPress ครั้งแรก
