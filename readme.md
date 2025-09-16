@@ -24,18 +24,15 @@ services:
   # ตั้งค่า MySQL 5.7
   db:
     image: mysql:5.7
-    container_name: wordpress_db
-    restart: always
+    container_name: wordpress_db # ชื่อคอนเทนเนอร์
+    restart: always # รีสตาร์ทคอนเทนเนอร์อัตโนมัติเมื่อหยุดทำงาน
     environment:
       MYSQL_DATABASE: wordpress # ชื่อฐานข้อมูล
       MYSQL_USER: wordpress # ชื่อผู้ใช้ฐานข้อมูล
-      MYSQL_PASSWORD: wordpress # รหัสผ่านฐานข้อมูล
-      MYSQL_ROOT_PASSWORD: rootpassword # รหัสผ่าน root
+      MYSQL_PASSWORD: wordpress # รหัสผ่านผู้ใช้ฐานข้อมูล
+      MYSQL_ROOT_PASSWORD: rootpassword # รหัสผ่านผู้ใช้ root
     volumes:
-      - db_data:/var/lib/mysql
-    # เปิดให้ host connect ถ้า port 3306 ว่าง
-    # ports:
-    #   - "3306:3306"
+      - ./db_data:/var/lib/mysql   
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
       interval: 5s
@@ -50,12 +47,12 @@ services:
     ports:
       - "8080:80"
     environment:
-      WORDPRESS_DB_HOST: db:3306 # ชี้ไปที่ service db
+      WORDPRESS_DB_HOST: db:3306 # ชื่อโฮสต์และพอร์ตของฐานข้อมูล
       WORDPRESS_DB_USER: wordpress # ชื่อผู้ใช้ฐานข้อมูล
-      WORDPRESS_DB_PASSWORD: wordpress # รหัสผ่านฐานข้อมูล
+      WORDPRESS_DB_PASSWORD: wordpress # รหัสผ่านผู้ใช้ฐานข้อมูล
       WORDPRESS_DB_NAME: wordpress # ชื่อฐานข้อมูล
     volumes:
-      - wordpress_data:/var/www/html
+      - ./wordpress_data:/var/www/html  
     depends_on:
       db:
         condition: service_healthy
@@ -63,23 +60,18 @@ services:
   # ตั้งค่า phpMyAdmin
   phpmyadmin:
     image: phpmyadmin/phpmyadmin # ใช้ image phpMyAdmin ล่าสุด
-    container_name: phpmyadmin_app # ชื่อ container
-    restart: always # รีสตาร์ทอัตโนมัติเมื่อ container หยุดทำงาน
+    container_name: phpmyadmin_app # ชื่อคอนเทนเนอร์
+    restart: always # รีสตาร์ทคอนเทนเนอร์อัตโนมัติเมื่อหยุดทำงาน
     environment:
-      PMA_HOST: db # ชี้ไปที่ service db
+      PMA_HOST: db # ชื่อโฮสต์ของฐานข้อมูล
       PMA_PORT: 3306 # พอร์ตของฐานข้อมูล
       PMA_USER: root # ชื่อผู้ใช้ฐานข้อมูล
-      PMA_PASSWORD: rootpassword   # รหัสผ่าน root
-      PMA_ABSOLUTE_URI: http://localhost:8081/
+      PMA_PASSWORD: rootpassword # รหัสผ่านผู้ใช้ฐานข้อมูล 
+      PMA_ABSOLUTE_URI: http://localhost:8081/ # URL สำหรับเข้าถึง phpMyAdmin
     ports:
       - "8081:80"
     depends_on:
       - db
-
-volumes:
-  wordpress_data:
-  db_data:
-
 ```
 💡 Tip: ใช้ path ของ Windows แบบ D:/... เท่านั้น และไม่ใช้ backslash \
 
@@ -216,9 +208,9 @@ WORDPRESS_DB_NAME: wordpress
 
 ## 5️⃣ คำสั่งตรวจสอบและจัดการ container
 ```powershell
-docker-compose up -d          # สร้างและรัน container
-docker-compose down -v        # หยุดและลบ container + volume
-docker ps                     # ดู container ที่รันอยู่
+docker-compose up -d           # สร้างและรัน container
+docker-compose down -v         # หยุดและลบ container + volume
+docker ps                      # ดู container ที่รันอยู่
 docker logs wordpress_db       # ดู log ของ MySQL
 docker logs wordpress_app      # ดู log ของ WordPress
 ```
