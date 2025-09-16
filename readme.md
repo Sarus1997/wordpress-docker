@@ -57,6 +57,14 @@ Remove-Item -Recurse -Force "D:\wordpress-docker\www\db_data"
 ```powershell
 docker-compose up -d
 ```
+Docker Compose จะสร้าง `db_data` และ `wordpress_data` ให้เองอัตโนมัติจากที่ประกาศไว้ใน `volumes:`
+
+ถ้าอยากสร้างเฉพาะ volume เองโดยตรง (ไม่ต้องรัน service) ก็ทำได้ เช่น:
+
+```bash
+docker volume create db_data
+docker volume create wordpress_data
+```
 <dev>
     <ul>
         <li>รอ 10–20 วินาทีให้ MySQL พร้อม</li>
