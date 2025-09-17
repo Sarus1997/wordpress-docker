@@ -385,7 +385,7 @@ docker logs wordpress_app      # ดู log ของ WordPress
 1. เข้าไปโฟลเดอร์ volume ของ Docker ที่ map ไว้ เช่น:
 
 ```powershell
-D:\New folder\wordpress-docker\wordpress_data
+D:\code\wordpress-docker\wordpress_data
 ```
 
 2. Copy ทั้งหมดไปยังโฟลเดอร์เว็บ server ของคุณ:
