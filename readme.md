@@ -29,6 +29,8 @@ Docker version 24.x.x
 Docker Compose version v2.x.x
 ```
 
+---
+
 ## 📝 2. สร้างไฟล์ docker-compose.yml
 
 สร้างไฟล์ docker-compose.yml ด้วยเนื้อหานี้:
@@ -109,6 +111,8 @@ Remove-Item -Recurse -Force "./db_data"
 Remove-Item -Recurse -Force "./wordpress_data"
 ```
 
+---
+
 ## ▶️ 4. รันและติดตั้ง
 
 ```powershell
@@ -168,6 +172,8 @@ docker-compose down
 docker-compose up -d
 ```
 
+---
+
 ## 🌐 5. ตั้งค่า WordPress
 
 ### 🌍 เข้าสู่หน้าติดตั้ง
@@ -210,6 +216,8 @@ docker-compose up -d
 | `docker exec -it wordpress_db mysql -uwordpress -pwordpress` | เข้า MySQL console |
 | `docker logs wordpress_app` | ดู log ของ WordPress |
 
+---
+
 ## 🔗 7. การเชื่อมต่อฐานข้อมูล
 
 | Service | URL/Host | Username | Password | Database |
@@ -221,7 +229,8 @@ docker-compose up -d
 ### 🔌 การเชื่อมต่อจากแอปพลิเคชันภายนอก
 
 **MySQL Workbench / DBeaver / HeidiSQL:**
-```
+
+```bash
 Host: 127.0.0.1
 Port: 3306
 User: wordpress
@@ -230,27 +239,29 @@ Database: wordpress
 ```
 
 ### 🏗️ สถาปัตยกรรมระบบ
-```
+
+```bash
 Browser → WordPress:8080 → MySQL:3306
        → phpMyAdmin:8081 →
 ```
 
----
-
-## ✅ การใช้งานต่อ
+### ✅ การใช้งานต่อ
 
 ### 🎨 การปรับแต่งเว็บไซต์
+
 - **🎭 เปลี่ยน Theme:** `Appearance → Themes`
 - **🔌 ติดตั้ง Plugin:** `Plugins → Add New`
 - **📄 สร้างหน้าใหม่:** `Pages → Add New`
 - **📝 เขียนโพสต์:** `Posts → Add New`
 
 ### ⚙️ การตั้งค่าที่สำคัญ
+
 - **🔗 Permalinks:** `Settings → Permalinks` → เลือก Post name
 - **👥 ผู้ใช้:** `Users` → เพิ่มผู้ใช้ใหม่
 - **🔒 Security:** ติดตั้ง plugin security เพิ่มเติม
 
 ### 💾 การสำรองข้อมูล
+
 ```powershell
 # สำรอง WordPress files
 docker exec wordpress_app tar czf /tmp/wordpress-backup.tar.gz /var/www/html
@@ -261,6 +272,7 @@ docker exec wordpress_db mysqldump -uwordpress -pwordpress wordpress > wordpress
 ```
 
 ### 🔄 การอัปเดต
+
 ```powershell
 # อัปเดต images
 docker-compose pull
@@ -269,9 +281,7 @@ docker-compose pull
 docker-compose up -d --force-recreate
 ```
 
----
-
-## 🎯 เคล็ดลับและการแก้ปัญหา
+### 🎯 เคล็ดลับและการแก้ปัญหา
 
 ### ⚠️ ปัญหาที่พบบ่อย
 
@@ -282,6 +292,7 @@ docker-compose up -d --force-recreate
 | **Permission denied** | รัน PowerShell แบบ Administrator |
 
 ### 💡 Tips ขั้นสูง
+
 - **🔒 Security:** เปลี่ยนรหัสผ่าน default ทั้งหมด
 - **🚀 Performance:** ใช้ Redis cache plugin
 - **🔍 SEO:** ติดตั้ง Yoast SEO plugin
@@ -289,11 +300,11 @@ docker-compose up -d --force-recreate
 
 ---
 <br>
-<br>
 
 # คู่มือเชื่อมต่อฐานข้อมูล WordPress + MySQL + PHPMyAdmin (Docker)
 
-## 1️⃣ ข้อมูลสำคัญจาก docker-compose.yml
+### 1️⃣ ข้อมูลสำคัญจาก docker-compose.yml
+
 | Service              | Database Host | Database Name | Username    | Password    | Port                 |
 | -------------------- | ------------- | ------------- | ----------- | ----------- | -------------------- |
 | MySQL Container      | `db`          | `wordpress`   | `wordpress` | `wordpress` | `3306` (internal)    |
@@ -301,21 +312,25 @@ docker-compose up -d --force-recreate
 | PHPMyAdmin Container | `db:3306`     | `wordpress`   | `wordpress` | `wordpress` | 8081 (Web GUI)       |
 
 ## 2️⃣ การตั้งค่า MySQL และ WordPress
+
 - `MYSQL_ROOT_PASSWORD: rootpassword` → รหัสผ่าน root สำหรับ MySQL (ใช้ในกรณีต้องการ admin access)
 - WordPress จะเชื่อมต่อ DB ผ่าน Docker network ชื่อ db
 
 
 ## 2️⃣ การเชื่อมต่อจาก WordPress
+
 ```yaml
 WORDPRESS_DB_HOST: db:3306
 WORDPRESS_DB_USER: wordpress
 WORDPRESS_DB_PASSWORD: wordpress
 WORDPRESS_DB_NAME: wordpress
 ```
+
 - WordPress จะเชื่อม MySQL container ผ่าน service name db โดยไม่ต้อง expose port
 - หากรันครั้งแรก MySQL container จะสร้าง database และ user ให้เองตาม environment
 
 ## 3️⃣ การเชื่อมต่อจาก PHPMyAdmin
+
 - URL: http://localhost:8081
 - Server: db
 - Username: wordpress
@@ -323,6 +338,7 @@ WORDPRESS_DB_NAME: wordpress
 - สามารถดู/แก้ไข database, table, user ได้
 
 ## 4️⃣ การเชื่อมต่อจากเครื่องตัวเอง (Host machine)
+
 ใช้ MySQL client เช่น MySQL Workbench / DBeaver / HeidiSQL
 - Host: `127.0.0.1` (ถ้า expose port 3306)
 - Port: `3306`
