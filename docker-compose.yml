@@ -13,7 +13,7 @@ services:
       MYSQL_PASSWORD: wordpress # รหัสผ่านผู้ใช้ฐานข้อมูล
       MYSQL_ROOT_PASSWORD: rootpassword # รหัสผ่านผู้ใช้ root
     volumes:
-      - ./db_data:/var/lib/mysql   
+      - ./db_data:/var/lib/mysql # db_data โฟลเดอร์ของฐานข้อมูล สามารถเปลี่ยนแปลงได้ตามต้องการ  
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
       interval: 5s
@@ -33,7 +33,7 @@ services:
       WORDPRESS_DB_PASSWORD: wordpress # รหัสผ่านผู้ใช้ฐานข้อมูล
       WORDPRESS_DB_NAME: wordpress # ชื่อฐานข้อมูล
     volumes:
-      - ./wordpress_data:/var/www/html  
+      - ./wordpress_data:/var/www/html  # wordpress_data โฟลเดอร์ของ WordPress สามารถเปลี่ยนแปลงได้ตามต้องการ
     depends_on:
       db:
         condition: service_healthy
