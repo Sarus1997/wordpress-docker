@@ -375,3 +375,83 @@ docker logs wordpress_app      # ดู log ของ WordPress
 - WordPress container → เชื่อม MySQL container ผ่าน service name db
 - PHPMyAdmin → เชื่อม MySQL container ผ่าน service name db
 - Host machine → เชื่อม MySQL container ผ่าน port expose หรือเชื่อม MySQL host โดยตรง
+
+---
+
+# ขั้นตอนแบบครบชุด สำหรับย้าย WordPress จาก Docker ไปใช้ใน `XAMPP/LAMP/WAMP/LARAGON` ทั้งไฟล์และฐานข้อมูล
+
+## 1️⃣ เตรียมไฟล์ WordPress (wordpress_data) หรือชื่อโฟลเดอร์ที่ map ไว้
+
+1. เข้าไปโฟลเดอร์ volume ของ Docker ที่ map ไว้ เช่น:
+
+```powershell
+D:\New folder\wordpress-docker\wordpress_data
+```
+
+2. Copy ทั้งหมดไปยังโฟลเดอร์เว็บ server ของคุณ:
+
+- XAMPP: `C:\xampp\htdocs\mywordpress`
+- WAMP: `C:\wamp64\www\mywordpress`
+- LARAGON: `C:\laragon\www\mywordpress`
+- LAMP: `/var/www/html/mywordpress`
+
+## 2️⃣ Export database จาก Docker
+
+1. รันคำสั่งใน PowerShell / Terminal:
+
+```powershell
+docker exec -i wordpress_db mysqldump -u root -prootpassword wordpress > wordpress.sql
+```
+
+- `wordpress_db` → ชื่อ container MySQL ของคุณ
+- `wordpress` → ชื่อ database ที่ใช้
+- `wordpress.sql` → ไฟล์ SQL ที่จะได้
+
+## 3️⃣ สร้าง Database ใหม่ใน XAMPP/LAMP/WAMP/Laragon
+
+1. เข้า phpMyAdmin ของ server ใหม่:
+- XAMPP → http://localhost/phpmyadmin
+- Laragon → http://localhost/phpmyadmin
+
+2. สร้าง database ใหม่ (ชื่อเหมือนเดิมหรือเปลี่ยนก็ได้) เช่น `wordpress`
+
+## 4️⃣ Import database
+
+1. ผ่าน phpMyAdmin → import ไฟล์ wordpress.sql หรือ ผ่าน command line:
+
+Windows (XAMPP/Laragon/WAMP)
+
+```powershell
+cd C:\xampp\mysql\bin
+mysql -u root -p wordpress < C:\path\to\wordpress.sql
+```
+
+Linux (LAMP)
+
+```powershell
+mysql -u root -p wordpress < /path/to/wordpress.sql
+```
+
+## 5️⃣ แก้ไข `wp-config.php`
+เปิดไฟล์ `wp-config.php` ในโฟลเดอร์ WordPress แล้วแก้ไขค่าดังนี้:
+
+```php
+define('DB_NAME', 'wordpress');        // ชื่อ database ใหม่
+define('DB_USER', 'root');             // ชื่อผู้ใช้ MySQL
+define('DB_PASSWORD', '');             // รหัสผ่าน MySQL
+define('DB_HOST', 'localhost');        // ปกติ localhost
+```
+
+## 6️⃣ ตรวจสอบไฟล์ Permission (Linux)
+
+สำหรับ LAMP ให้แน่ใจว่า Apache สามารถอ่าน/เขียนไฟล์ได้:
+
+```bash
+sudo chown -R www-data:www-data /var/www/html/mywordpress
+sudo chmod -R 755 /var/www/html/mywordpress
+```
+
+## 7️⃣ เข้าใช้งาน
+
+- เปิด browser → http://localhost/mywordpress
+- WordPress ควรทำงานได้เหมือนเดิม พร้อม theme, plugin, media ที่เคยทำบน Docker
