@@ -29,6 +29,13 @@ Docker version 24.x.x
 Docker Compose version v2.x.x
 ```
 
+```powershell
+# อัปเดต images WordPress ล่าสุด (ถ้าต้องการ)
+docker pull wordpress:latest
+
+# wordpress:latest (wordpress คือ ชื่อ image สามารถเปลี่ยนได้ตามต้องการ)
+```
+
 ---
 
 ## 📝 2. สร้างไฟล์ docker-compose.yml
