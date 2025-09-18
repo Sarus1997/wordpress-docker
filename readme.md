@@ -29,8 +29,6 @@ Docker version 24.x.x
 Docker Compose version v2.x.x
 ```
 
----
-
 ## 📝 2. สร้างไฟล์ docker-compose.yml
 
 สร้างไฟล์ docker-compose.yml ด้วยเนื้อหานี้:
@@ -96,8 +94,6 @@ services:
 
 > **💡 เทคนิค:** ใช้ path แบบ `D:/...` เท่านั้น และไม่ใช้ backslash `\` บน Windows
 
----
-
 ## 🧹 3. ล้างข้อมูลเก่า
 
 หากเคยติดตั้งมาก่อนและต้องการเริ่มใหม่:
@@ -110,8 +106,6 @@ docker-compose down -v
 Remove-Item -Recurse -Force "./db_data"
 Remove-Item -Recurse -Force "./wordpress_data"
 ```
-
----
 
 ## ▶️ 4. รันและติดตั้ง
 
@@ -181,14 +175,11 @@ docker pull wordpress:latest
 # wordpress:latest (wordpress คือ ชื่อ image สามารถเปลี่ยนได้ตามต้องการ)
 ```
 
----
-
 ## 🌐 5. ตั้งค่า WordPress
 
 ### 🌍 เข้าสู่หน้าติดตั้ง
 1. เปิด browser → **http://localhost:8080**
 2. เลือกภาษา → **ไทย** (หรือตามต้องการ)
-
 
 ### 📝 กรอกข้อมูลเริ่มต้น
 | ฟิลด์ | ค่าที่แนะนำ |
@@ -203,8 +194,6 @@ docker pull wordpress:latest
 3. กด **"ติดตั้ง WordPress"**
 4. เมื่อเสร็จแล้ว กด **"เข้าสู่ระบบ"**
 5. ยินดีต้อนรับสู่ WordPress Dashboard! 🎉
-
----
 
 ## ⚡ 6. คำสั่งที่ควรรู้
 
@@ -225,7 +214,6 @@ docker pull wordpress:latest
 | `docker exec -it wordpress_db mysql -uwordpress -pwordpress` | เข้า MySQL console |
 | `docker logs wordpress_app` | ดู log ของ WordPress |
 
----
 
 ## 🔗 7. การเชื่อมต่อฐานข้อมูล
 
@@ -378,113 +366,174 @@ docker logs wordpress_app      # ดู log ของ WordPress
 
 ---
 
-# ขั้นตอนแบบครบชุด สำหรับย้าย WordPress จาก Docker ไปใช้ใน `XAMPP/LAMP/WAMP/LARAGON` ทั้งไฟล์และฐานข้อมูล
+# ขั้นตอนการย้าย WordPress ที่อยู่บน Docker ไปใช้ Laragon / XAMPP / WAMP / LAMP
 
-## 1️⃣ เตรียมไฟล์ WordPress (wordpress_data) หรือชื่อโฟลเดอร์ที่ map ไว้
-
-1. เข้าไปโฟลเดอร์ volume ของ Docker ที่ map ไว้ เช่น:
-
-```powershell
-D:\code\wordpress-docker\wordpress_data
-```
-
-2. Copy ทั้งหมดไปยังโฟลเดอร์เว็บ server ของคุณ:
-
-- XAMPP: `C:\xampp\htdocs\mywordpress`
-- WAMP: `C:\wamp64\www\mywordpress`
-- LARAGON: `C:\laragon\www\mywordpress`
-- LAMP: `/var/www/html/mywordpress`
-
-## 2️⃣ Export database จาก Docker
-
-1. รันคำสั่งใน PowerShell / Terminal:
+## 1️⃣ เตรียมไฟล์ WordPress จาก Docker
+1. เข้าถึง container ของ WordPress
 
 ```powershell
-docker exec -i wordpress_db mysqldump -u root -prootpassword wordpress > wordpress.sql
+docker ps
+docker exec -it <container_name> /bin/bash # container_name คือชื่อ container ของ WordPress
 ```
 
-- `wordpress_db` → ชื่อ container MySQL ของคุณ
-- `wordpress` → ชื่อ database ที่ใช้
-- `wordpress.sql` → ไฟล์ SQL ที่จะได้
-
-## 3️⃣ สร้าง Database ใหม่ใน XAMPP/LAMP/WAMP/Laragon
-
-1. เข้า phpMyAdmin ของ server ใหม่:
-- XAMPP → http://localhost/phpmyadmin
-- Laragon → http://localhost/phpmyadmin
-
-2. สร้าง database ใหม่ (ชื่อเหมือนเดิมหรือเปลี่ยนก็ได้) เช่น `wordpress`
-
-## 4️⃣ Import database
-
-1. ผ่าน phpMyAdmin → import ไฟล์ wordpress.sql หรือ ผ่าน command line:
-
-Windows (XAMPP/Laragon/WAMP)
+2. คัดลอกไฟล์ทั้งหมดใน โฟลเดอร์ WordPress (เช่น `/var/www/html`) ออกมา
+  - ใช้ docker cp เช่น:
 
 ```powershell
-cd C:\xampp\mysql\bin
-mysql -u root -p wordpress < C:\path\to\wordpress.sql
+docker cp <container_name>:/var/www/html ./wordpress
 ```
 
-Linux (LAMP)
+  - จะได้โฟลเดอร์ `wordpress` บนเครื่องคุณ
 
-```powershell
-mysql -u root -p wordpress < /path/to/wordpress.sql
-```
 
-## 5️⃣ แก้ไข `wp-config.php`
-เปิดไฟล์ `wp-config.php` ในโฟลเดอร์ WordPress แล้วแก้ไขค่าดังนี้:
+## 2️⃣ Export ฐานข้อมูล
 
-```php
-define('DB_NAME', 'wordpress');        // ชื่อ database ใหม่
-define('DB_USER', 'root');             // ชื่อผู้ใช้ MySQL
-define('DB_PASSWORD', '');             // รหัสผ่าน MySQL
-define('DB_HOST', 'localhost');        // ปกติ localhost
-```
-
-## 6️⃣ ตรวจสอบไฟล์ Permission (Linux)
-
-สำหรับ LAMP ให้แน่ใจว่า Apache สามารถอ่าน/เขียนไฟล์ได้:
+1. เข้าไปใน container ของ MySQL/MariaDB:
 
 ```bash
-sudo chown -R www-data:www-data /var/www/html/mywordpress
-sudo chmod -R 755 /var/www/html/mywordpress
+docker exec -it <mysql_container_name> bash # mysql_container_name คือชื่อ container ของ MySQL/MariaDB เช่นwordpress_db
 ```
 
-## 7️⃣ เข้าใช้งาน
+2. ใช้คำสั่ง `mysqldump` export database:
 
-- เปิด browser → http://localhost/mywordpress
-- WordPress ควรทำงานได้เหมือนเดิม พร้อม theme, plugin, media ที่เคยทำบน Docker
+```bash
+mysqldump -u root -p wordpress_db > /tmp/wordpress.sql
+```
 
----
+หรือ
 
-## วิธีการ Export database SQL จาก MySQL container
-
-### 1️⃣ ทำ mysqldump
-
-```cmd
+```bash
 docker exec -i wordpress_db mysqldump -u wordpress -pwordpress wordpress > wordpress.sql
 ```
 
-### 2️⃣ นำเข้าไปใน Laragon / XAMPP / WAMP / LAMP
-1. เปิด Laragon / XAMPP / WAMP / LAMP → Start All (Apache + MySQL)
-2. เข้า phpMyAdmin (http://localhost/phpmyadmin/)
-3. สร้าง database ชื่อ wordpress
-4. Import ไฟล์ wordpress.sql
-
-### 3️⃣ แก้ไข wp-config.php
-
-ใน `C:\laragon\www\wordpress_data\wp-config.php` แก้ไขให้ตรงกับ Laragon:
-
-```php
-define('DB_NAME', 'wordpress');
-define('DB_USER', 'root');
-define('DB_PASSWORD', '');
-define('DB_HOST', 'localhost');
-``` 
-
-หลังจากนี้เปิดเว็บ:
+3. copy ไฟล์ออกมาที่เครื่อง host:
 
 ```bash
-http://localhost/wordpress_data
+docker cp <mysql_container_name>:/tmp/wordpress.sql ./wordpress.sql
 ```
+
+## 3️⃣ ติดตั้ง Laragon / XAMPP / WAMP / LAMP
+
+  - สมมติติดตั้งแล้ว และใช้ htdocs หรือ www เป็นโฟลเดอร์เว็บ
+  - วาง โฟลเดอร์ WordPress ลงไป เช่น:
+
+```bash
+C:\laragon\www\wordpress
+```
+
+## 4️⃣ Import Database ไปยัง XAMPP/Laragon
+
+1. เปิด phpMyAdmin หรือใช้ command line
+2. สร้าง database ใหม่ (เช่น wordpress_db)
+3. Import ไฟล์ .sql ที่ export มาจาก Docker
+
+  - phpMyAdmin → Import → เลือกไฟล์ .sql
+  - หรือ command line:
+
+```bash
+mysql -u root -p wordpress_db < wordpress.sql
+```
+
+## 5️⃣ แก้ไข wp-config.php
+
+เปิดไฟล์ `wp-config.php` ในโฟลเดอร์ WordPress แล้วแก้ไขค่าต่อไปนี้ให้ตรงกับสภาพแวดล้อมใหม่:
+
+```php
+define('DB_NAME', 'wordpress_db');    // ชื่อฐานข้อมูลใหม่
+define('DB_USER', 'root');            // user ของ XAMPP/Laragon/WAMP
+define('DB_PASSWORD', '');            // password ของ XAMPP/Laragon/WAMP (ปกติไม่มี)
+define('DB_HOST', 'localhost');       // database host
+```
+
+## 6️⃣ ตรวจสอบ Permalinks และ URL
+
+  - ถ้า URL ของเว็บเปลี่ยน เช่น จาก http://localhost:8000 เป็น http://localhost/wordpress
+  - แก้ไขในฐานข้อมูลด้วย SQL:
+
+```sql
+  UPDATE wp_options SET option_value = 'http://localhost/wordpress' WHERE option_name = 'siteurl';
+  UPDATE wp_options SET option_value = 'http://localhost/wordpress' WHERE option_name = 'home';
+```
+
+  - หรือใช้ plugin เช่น Better Search Replace แก้ URL ทุกที่
+
+## 7️⃣ ทดสอบเว็บไซต์
+
+1. เปิด browser → `http://localhost/wordpress`
+2. ถ้าเจอ Error เกี่ยวกับ wp-content/plugins ให้ปิด `plugin` ชั่วคราว (เปลี่ยนชื่อโฟลเดอร์ plugins เป็น `plugins_old`)
+
+---
+
+# ขั้นตอนการเปลี่ยนชื่อโฟลเดอร์ และ ชื่อฐานข้อมูล
+
+## 1️⃣ เปลี่ยนชื่อโฟลเดอร์เว็บ
+
+  - ถ้าเดิมคุณวางโฟลเดอร์ไว้:
+
+```bash
+C:\laragon\www\wordpress
+```
+
+  - เปลี่ยนเป็นชื่ออื่น เช่น:
+
+```bash
+C:\laragon\www\wordpress_site1
+C:\laragon\www\wordpress_site2
+```
+
+  - URL ที่เข้าจะเปลี่ยนตามชื่อโฟลเดอร์ เช่น:
+
+```bash
+http://localhost/wordpress_site1
+http://localhost/wordpress_site2
+```
+
+## 2️⃣ เปลี่ยนชื่อฐานข้อมูล
+
+- ตอนสร้าง database ใหม่ ให้ตั้งชื่อแตกต่างกัน เช่น:
+
+```nginx
+wordpress_db1
+wordpress_db2
+```
+
+## 3️⃣ ปรับ wp-config.php ของแต่ละเว็บ
+
+- เปิดไฟล์ wp-config.php ของแต่ละเว็บ
+- แก้ค่าให้ตรงกับ database ของเว็บนั้น ๆ
+
+```php
+define('DB_NAME', 'wordpress_db1'); // เปลี่ยนตาม database ใหม่
+define('DB_USER', 'root');           
+define('DB_PASSWORD', '');           
+define('DB_HOST', 'localhost');      
+```
+
+- สำหรับเว็บที่ 2:
+
+```php
+define('DB_NAME', 'wordpress_db2');
+```
+
+## 4️⃣ ปรับ URL ในฐานข้อมูล
+
+- ถ้าเปลี่ยนชื่อโฟลเดอร์เว็บ ต้องแก้ค่า siteurl และ home ในฐานข้อมูลของเว็บนั้น
+
+```sql
+UPDATE wp_options SET option_value = 'http://localhost/wordpress_site1' WHERE option_name = 'siteurl';
+UPDATE wp_options SET option_value = 'http://localhost/wordpress_site1' WHERE option_name = 'home';
+```
+
+- สำหรับเว็บที่ 2:
+
+```sql
+UPDATE wp_options SET option_value = 'http://localhost/wordpress_site2' WHERE option_name = 'siteurl';
+UPDATE wp_options SET option_value = 'http://localhost/wordpress_site2' WHERE option_name = 'home';
+```
+
+## 5️⃣ สรุปข้อสำคัญ
+
+- โฟลเดอร์เว็บ → เปลี่ยนได้ตามต้องการ
+- Database → ต้องไม่ซ้ำกัน
+- wp-config.php → ต้องเชื่อมกับ database ให้ถูกต้อง
+- URL → แก้ในฐานข้อมูลให้ตรงกับโฟลเดอร์ใหม่
