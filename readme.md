@@ -455,3 +455,36 @@ sudo chmod -R 755 /var/www/html/mywordpress
 
 - เปิด browser → http://localhost/mywordpress
 - WordPress ควรทำงานได้เหมือนเดิม พร้อม theme, plugin, media ที่เคยทำบน Docker
+
+---
+
+## วิธีการ Export database SQL จาก MySQL container
+
+### 1️⃣ ทำ mysqldump
+
+```cmd
+docker exec -i wordpress_db mysqldump -u wordpress -pwordpress wordpress > wordpress.sql
+```
+
+### 2️⃣ นำเข้าไปใน Laragon / XAMPP / WAMP / LAMP
+1. เปิด Laragon / XAMPP / WAMP / LAMP → Start All (Apache + MySQL)
+2. เข้า phpMyAdmin (http://localhost/phpmyadmin/)
+3. สร้าง database ชื่อ wordpress
+4. Import ไฟล์ wordpress.sql
+
+### 3️⃣ แก้ไข wp-config.php
+
+ใน `C:\laragon\www\wordpress_data\wp-config.php` แก้ไขให้ตรงกับ Laragon:
+
+```php
+define('DB_NAME', 'wordpress');
+define('DB_USER', 'root');
+define('DB_PASSWORD', '');
+define('DB_HOST', 'localhost');
+``` 
+
+หลังจากนี้เปิดเว็บ:
+
+```bash
+http://localhost/wordpress_data
+```
